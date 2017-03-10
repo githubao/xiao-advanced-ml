@@ -74,14 +74,15 @@ def build_nn():
         ys = tf.placeholder(tf.float32, [None, 1], name='y_input')
 
     # layer1 隐藏层 输入层维度*隐藏层维度
-    l1 = add_layer(xs, 1, 10, activation_function=tf.nn.relu)
+    l1 = add_layer(xs, 1, 10, n_layer=1, activation_function=tf.nn.relu)
 
     # 输出层
-    prediction = add_layer(l1, 10, 1, activation_function=None)
+    prediction = add_layer(l1, 10, 1, n_layer=2, activation_function=None)
 
     # 损失
     with tf.name_scope('loss'):
         loss = tf.reduce_mean(tf.reduce_sum(tf.square(ys - prediction), reduction_indices=[1]))
+        tf.summary.scalar('loss', loss)
 
     # 训练
     # 不同的学习优化器，对应于不同的学习效率
@@ -95,6 +96,12 @@ def build_nn():
     init = tf.global_variables_initializer()
 
     with tf.Session() as sess:
+        # 绘图
+        merged = tf.summary.merge_all()
+        writer = tf.summary.FileWriter('../logs/', sess.graph)
+        writer.add_graph(sess.graph)
+        writer.close()
+
         sess.run(init)
 
         fig = plt.figure()
@@ -122,9 +129,10 @@ def build_nn():
 
                 plt.pause(0.1)
 
-        writer = tf.summary.FileWriter('../logs/', sess.graph)
-        writer.add_graph(sess.graph)
-        writer.close()
+                merged_result = sess.run(merged, feed_dict={xs: x_data, ys: y_data})
+                writer.add_summary(merged_result, step)
+
+                writer.close()
 
 
 # 优化器
@@ -132,12 +140,15 @@ def optimize():
     pass
 
 
-def add_layer(inputs, in_size, out_size, activation_function=None):
+def add_layer(inputs, in_size, out_size, n_layer, activation_function=None):
+    layer_name = 'layer{}'.format(n_layer)
     with tf.name_scope('layer'):
         with tf.name_scope('weights'):
             Weights = tf.Variable(tf.random_normal([in_size, out_size]), name='W')
+            tf.summary.histogram(layer_name + '/weights', Weights)
         with tf.name_scope('biases'):
             biases = tf.Variable(tf.zeros([1, out_size]) + 0.1, name='b')
+            tf.summary.histogram(layer_name + '/biases', biases)
         with tf.name_scope('Wx_plus_b'):
             Wx_plus_b = tf.matmul(inputs, Weights) + biases
 
@@ -146,12 +157,13 @@ def add_layer(inputs, in_size, out_size, activation_function=None):
         else:
             outputs = activation_function(Wx_plus_b)
 
+        tf.summary.histogram(layer_name + '/outputs', outputs)
         return outputs
 
 
 def tf_board():
     build_nn()
-    # tensorborad --logdir='logs/'
+    # tensorboard --logdir='logs/'
 
 
 def main():
