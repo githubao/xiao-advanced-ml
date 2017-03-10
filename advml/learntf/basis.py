@@ -10,7 +10,7 @@
 @contact: mailbaoqiang@gmail.com
 @site: http://www.github.com/githubao
 @software: PyCharm
-@file: tutorial.py
+@file: basis.py
 @time: 2017/3/9 19:59
 """
 
@@ -98,7 +98,7 @@ def build_nn():
     with tf.Session() as sess:
         # 绘图
         merged = tf.summary.merge_all()
-        writer = tf.summary.FileWriter('../logs/', sess.graph)
+        writer = tf.summary.FileWriter('../log/', sess.graph)
         writer.add_graph(sess.graph)
         writer.close()
 
@@ -163,7 +163,7 @@ def add_layer(inputs, in_size, out_size, n_layer, activation_function=None):
 
 def tf_board():
     build_nn()
-    # tensorboard --logdir='logs/'
+    # tensorboard --logdir='log/'
 
 
 def main():

@@ -30,7 +30,7 @@ var/
 *.manifest
 *.spec
 
-# Installer logs
+# Installer log
 pip-log.txt
 pip-delete-this-directory.txt
 
@@ -88,4 +88,5 @@ ENV/
 # Rope project settings
 .ropeproject
 .idea/
-advml/logs/
+advml/log/
+advml/file/
