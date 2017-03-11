@@ -31,7 +31,7 @@ BATCH_START_TEST = 0
 def get_batch():
     global BATCH_START, TIME_STEPS
 
-    xs = np.arange(BATCH_START, BATCH_START + TIME_STEPS * BATCH_SIZE).reshape((BATCH_SIZE, TIME_STEPS))/10
+    xs = np.arange(BATCH_START, BATCH_START + TIME_STEPS * BATCH_SIZE).reshape((BATCH_SIZE, TIME_STEPS))/(10 * np.pi)
     seq = np.sin(xs)
     res = np.cos(xs)
 
