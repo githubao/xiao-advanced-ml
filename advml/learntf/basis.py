@@ -152,6 +152,9 @@ def add_layer(inputs, in_size, out_size, n_layer, activation_function=None):
         with tf.name_scope('Wx_plus_b'):
             Wx_plus_b = tf.matmul(inputs, Weights) + biases
 
+            # dropout
+            Wx_plus_b = tf.nn.dropout(Wx_plus_b,keep_prob=0.5)
+
         if activation_function is None:
             outputs = Wx_plus_b
         else:
@@ -163,7 +166,7 @@ def add_layer(inputs, in_size, out_size, n_layer, activation_function=None):
 
 def tf_board():
     build_nn()
-    # tensorboard --logdir='log/'
+    # tensorboard --logdir='D:\\d\\code\\NLP_Python\\xiao-advanced-ml\\advml\\log\\'
 
 
 def main():
