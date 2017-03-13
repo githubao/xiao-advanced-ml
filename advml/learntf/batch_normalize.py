@@ -18,7 +18,8 @@ import tensorflow as tf
 import numpy as np
 import matplotlib.pyplot as plt
 
-ACTIVATION = tf.nn.relu
+# ACTIVATION = tf.nn.relu
+ACTIVATION = tf.nn.tanh
 N_LAYERS = 7
 N_HIDDEN_UNITS = 30
 
@@ -31,7 +32,7 @@ def fix_seed(seed=1):
 def plot_his(inputs, inputs_norm):
     for j, all_inputs in enumerate([inputs, inputs_norm]):
         for i, input in enumerate(all_inputs):
-            plt.subplots(2, len(all_inputs), j * len(all_inputs) + (i + 1))
+            plt.subplot(2, len(all_inputs), j * len(all_inputs) + (i + 1))
             plt.cla()
             if i == 0:
                 the_range = (-7, 10)
@@ -55,14 +56,15 @@ def plot_his(inputs, inputs_norm):
 def build_net(xs, ys, norm):
     def add_layer(inputs, in_size, out_size, activation_function=None, norm=False):
         Weights = tf.Variable(tf.random_normal([in_size, out_size], mean=0, stddev=1))
-        biases = tf.Variable(tf.zeros([1, out_size] + 0.1))
+        biases = tf.Variable(tf.zeros([1, out_size]) + 0.1)
 
         Wx_plus_b = tf.matmul(inputs, Weights) + biases
 
         if norm:
             fc_mean, fc_var = tf.nn.moments(
                     Wx_plus_b,
-                    axes=[0]
+                    # [batch,height,width]
+                    axes=[0],
             )
             scale = tf.Variable(tf.ones([out_size]))
             shift = tf.Variable(tf.zeros([out_size]))
@@ -76,13 +78,17 @@ def build_net(xs, ys, norm):
                     return tf.identity(fc_mean), tf.identity(fc_var)
 
             mean, var = mean_var_with_update()
-
             Wx_plus_b = tf.nn.batch_normalization(Wx_plus_b, mean, var, shift, scale, epsilon)
+            # similar with below:
+            # Wx_plus_b = (Wx_plus_b - fc_mean) / tf.sqrt(fc_var+epsilon)
+            # Wx_plus_b = Wx_plus_b * scale + shift
 
         if activation_function is None:
             outputs = Wx_plus_b
         else:
             outputs = activation_function(Wx_plus_b)
+
+        return outputs
 
     fix_seed(1)
 
@@ -94,6 +100,7 @@ def build_net(xs, ys, norm):
         scale = tf.Variable(tf.ones([1]))
         shift = tf.Variable(tf.zeros([1]))
         epsilon = 0.001
+
         ema = tf.train.ExponentialMovingAverage(decay=0.5)
 
         def mean_var_with_update():
@@ -107,7 +114,8 @@ def build_net(xs, ys, norm):
     layers_inputs = [xs]
     for l_n in range(N_LAYERS):
         layer_input = layers_inputs[l_n]
-        in_size = layer_input[l_n].get_shape()[1].value
+        in_size = layer_input[l_n].get_shape()[-1].value
+        # in_size = layer_input[l_n].get_shape()[-1].value
 
         output = add_layer(
                 layer_input,
@@ -116,8 +124,10 @@ def build_net(xs, ys, norm):
                 ACTIVATION,
                 norm,
         )
+        layers_inputs.append(output)
 
     prediction = add_layer(layers_inputs[-1], 30, 1, activation_function=None)
+
     cost = tf.reduce_mean(tf.reduce_sum(tf.square(ys - prediction), reduction_indices=[1]))
     train_op = tf.train.GradientDescentOptimizer(0.001).minimize(cost)
     return [train_op, cost, layers_inputs]
@@ -148,14 +158,14 @@ def batch_normalize_run():
 
         plt.ion()
         plt.figure(figsize=(7, 3))
-        for i in range(250):
+        for i in range(251):
             if i % 50 == 0:
                 all_inputs, all_inputs_norm = sess.run([layers_inputs, layers_inputs_norm],
                                                        feed_dict={xs: x_data, ys: y_data})
                 plot_his(all_inputs, all_inputs_norm)
 
             sess.run([train_op, train_op_norm],
-                     feed_dict={xs: x_data[i * 10:(i + 1) * 10], ys: y_data[i * 10, (i + 1) * 10]})
+                     feed_dict={xs: x_data[i * 10:(i + 1) * 10], ys: y_data[i * 10: (i + 1) * 10]})
 
             if i % record_step == 0:
                 cost_his.append(sess.run(cost, feed_dict={xs: x_data, ys: y_data}))
@@ -164,7 +174,7 @@ def batch_normalize_run():
     plt.ioff()
     plt.figure()
     plt.plot(np.arange(len(cost_his)) * record_step, np.array(cost_his), label='no BN')
-    plt.plot(np.arange(len(cost_his)) * record_step, np.array(cost_his_norm), label='no BN')
+    plt.plot(np.arange(len(cost_his_norm)) * record_step, np.array(cost_his_norm), label='BN')
     plt.legend()
     plt.show()
 
