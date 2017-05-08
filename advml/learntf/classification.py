@@ -46,6 +46,7 @@ def classify():
         sess.run(train_step, feed_dict={xs: batch_xs, ys: batch_ys})
         if i % 50 == 0:
             print('step {}: {}'.format(i, compute_accuracy(mnist.test.images, mnist.test.labels)))
+            print(sess.run(cross_entropy,feed_dict={xs: mnist.test.images, ys: mnist.test.labels}))
 
     sess.close()
 
