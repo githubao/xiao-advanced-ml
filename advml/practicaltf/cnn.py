@@ -47,6 +47,13 @@ def max_pool_2x2(x):
 
 
 def run():
+    '''
+    step[0700] training accuracy: 0.980000
+    step[0800] training accuracy: 0.920000
+    step[0900] training accuracy: 0.980000
+    :return: 
+    '''
+
     # 定义变量
     x = tf.placeholder(tf.float32, [None, 784])
     y_ = tf.placeholder(tf.float32, [None, 10])
@@ -93,16 +100,18 @@ def run():
     # 训练
     with tf.Session() as sess:
         sess.run(tf.global_variables_initializer())
-        for i in range(20000):
+        # for i in range(20000):
+        for i in range(1000):
             batch = mnist.train.next_batch(50)
             sess.run(train_step, feed_dict={x: batch[0], y_: batch[1], keep_prob: 0.5})
 
             if i % 100 == 0:
                 train_accuracy = sess.run(accuracy, feed_dict={x: batch[0], y_: batch[1], keep_prob: 1})
-                print('step[{:04d}] training accuracy: {:0.6g}'.format(i, train_accuracy))
+                print('step[{:04d}] training accuracy: {:0.6f}'.format(i, train_accuracy))
 
         test_accuracy = sess.run(accuracy, feed_dict={x: mnist.test.images, y_: mnist.test.labels, keep_prob: 1})
-        print('Final test accuracy: {:0.6g}'.format(i, test_accuracy))
+        print('Final test accuracy: {:0.6f}'.format(test_accuracy))
+
 
 def main():
     run()
