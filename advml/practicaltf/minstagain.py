@@ -12,7 +12,7 @@ from tensorflow.examples.tutorials.mnist import input_data
 from advml.pth import *
 import tensorflow as tf
 
-mnist = input_data.read_data_sets('/MNIST_data'.format(FILE_PATH), one_hot=True)
+mnist = input_data.read_data_sets('{}/MNIST_data'.format(FILE_PATH), one_hot=True)
 
 
 def train():
