@@ -27,6 +27,10 @@ mnist = input_data.read_data_sets('{}/MNIST_data'.format(FILE_PATH), one_hot=Tru
 def train():
     '''
     [*,784] * [784,10] + [*,10] = [*,10]
+    [2850]: 0.979200
+    [2900]: 0.980600
+    [2950]: 0.980100
+
     :return: 
 
     '''
@@ -67,9 +71,12 @@ def train():
             sess.run(train_step, feed_dict={x: batch_xs, y_: batch_ys, keep_prob: 0.75})
 
             if i % 50 == 0:
-                test_accuracy = sess.run(accuracy,
-                                         feed_dict={x: mnist.test.images, y_: mnist.test.labels, keep_prob: 1})
-                print('[{:03d}]: {:03f}'.format(i, test_accuracy))
+                train_accuracy = sess.run(accuracy,
+                                         feed_dict={x: batch_xs, y_: batch_ys, keep_prob: 1})
+                print('[{:03d}]: {:03f}'.format(i, train_accuracy))
+
+        test_accuracy = sess.run(accuracy, feed_dict={x: mnist.test.images, y_: mnist.test.labels, keep_prob: 1})
+        print('Final test accuracy: {:03g}'.format(test_accuracy))
 
 
 def main():
