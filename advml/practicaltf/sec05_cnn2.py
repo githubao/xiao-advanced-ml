@@ -30,6 +30,12 @@ def variable_with_weight_loss(shape, stddev, w1):
 
 
 def build_net():
+    '''
+    step 540, loss=1.49 (95.4 examples/sec; 1.342 sec/batch)
+    step 550, loss=1.50 (91.5 examples/sec; 1.399 sec/batch)
+    :return: 
+    '''
+
     # 训练数据
     cifar10.maybe_download_and_extract()
     image_train, labels_train = cifar10_input.distorted_inputs(data_dir=data_dir, batch_size=batch_size)
@@ -39,6 +45,10 @@ def build_net():
 
     # 第一层
     weight1 = variable_with_weight_loss(shape=[5, 5, 3, 64], stddev=5e-2, w1=0.0)
+
+    # image_holder: [batch, in_height, in_width, in_channels]
+    # weight1: [filter_height, filter_width, in_channels, out_channels]
+
     kernel1 = tf.nn.conv2d(image_holder, weight1, [1, 1, 1, 1], padding='SAME')
     bias1 = tf.Variable(tf.constant(0.0, shape=[64]))
     conv1 = tf.nn.relu(tf.nn.bias_add(kernel1, bias1))

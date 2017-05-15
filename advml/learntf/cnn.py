@@ -10,7 +10,7 @@
 @contact: mailbaoqiang@gmail.com
 @site: http://www.github.com/githubao
 @software: PyCharm
-@file: cnn.py
+@file: sec04_cnn.py
 @time: 2017/3/11 15:10
 """
 

@@ -10,7 +10,7 @@
 @contact: mailbaoqiang@gmail.com
 @site: http://www.github.com/githubao
 @software: PyCharm
-@file: autoencoder.py
+@file: sec02_autoencoder.py
 @time: 2017/3/13 19:18
 """
 
