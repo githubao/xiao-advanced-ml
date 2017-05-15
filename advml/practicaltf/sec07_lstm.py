@@ -14,7 +14,7 @@ import numpy as np
 import tensorflow as tf
 from advml.pth import *
 
-file_name = '{}/models/sample-examples/data/'.format(FILE_PATH)
+file_name = '{}/models/simple-examples/data/'.format(FILE_PATH)
 
 
 class PTBInput:
@@ -40,7 +40,7 @@ class PTBModel:
         if is_training and config.keep_prob < 1:
             def attn_cell():
                 return tf.contrib.rnn.DropoutWrapper(lstm_cell(), output_keep_prob=config.keep_prob)
-        cell = tf.contrib.rnn.MitiRNNCell([attn_cell() for _ in range(config.num_layers)], state_is_tuple=True)
+        cell = tf.contrib.rnn.MultiRNNCell([attn_cell() for _ in range(config.num_layers)], state_is_tuple=True)
 
         self._initial_state = cell.zero_state(batch_size, tf.float32)
 
@@ -213,6 +213,12 @@ def run_epoch(session, model, eval_op=None, verbose=False):
 
 
 def train():
+    '''
+    Epoch: 1 Training Perplexity: 623.067
+    Epoch: 1 Valid Perplexity: 491.580
+    Test Perplexity: 467.473
+    :return: 
+    '''
     raw_data = reader.ptb_raw_data(file_name)
     train_data, valid_data, test_data, _ = raw_data
 
@@ -227,22 +233,22 @@ def train():
         with tf.name_scope('Train'):
             train_input = PTBInput(config=config, data=train_data, name='TrainInput')
             with tf.variable_scope('Model', reuse=None, initializer=initializer):
-                m = PTBModel(is_training=True, config=config, input_=train_data)
+                m = PTBModel(is_training=True, config=config, input_=train_input)
 
         with tf.name_scope('Valid'):
             valid_input = PTBInput(config=config, data=valid_data, name='ValidInput')
             with tf.variable_scope('Model', reuse=True, initializer=initializer):
-                mvalid = PTBModel(is_training=False, config=config, input_=valid_data)
+                mvalid = PTBModel(is_training=False, config=config, input_=valid_input)
 
         with tf.name_scope('Test'):
             test_input = PTBInput(config=eval_config, data=test_data, name='TestInput')
             with tf.variable_scope('Model', reuse=True, initializer=initializer):
-                mtest = PTBModel(is_training=False, config=eval_config, input_=test_data)
+                mtest = PTBModel(is_training=False, config=eval_config, input_=test_input)
 
         sv = tf.train.Supervisor()
         with sv.managed_session() as sess:
             for i in range(config.max_max_epoch):
-                lr_decay = config.lr_decay ** max(i + 1 - config.max_epoch, 0.0)
+                lr_decay = config.lr_decay ** max(i + 1 - config.max_epoch, 0)
                 m.assign_lr(sess, config.learning_rate * lr_decay)
                 print('Epoch: {:d} Learning rate: {:.3f}'.format(i + 1, sess.run(m.lr)))
 
