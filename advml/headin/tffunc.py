@@ -205,6 +205,16 @@ def sparse_to_dense():
     pass
 
 
+def namescope_variablescope():
+    """
+    name_scope 对于get_variable()无效，没有变量作用域
+               对于Variable()，会区分不同的变量，即使名字相同
+    variable_scope 对于 get_variable()，调用scope.reuse_variables()，可以重复使用参数
+               对于 Variable()，会区分不同的变量，即使名字相同
+    :return: 
+    """
+
+
 def sample_demo():
     """
 
